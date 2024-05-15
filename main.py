@@ -86,7 +86,7 @@ def change_car(filename):
     pyautogui.click(x,y)
     x, y = pyscreeze.locateCenterOnScreen('images/file_name.png', confidence="0.9")
     pyautogui.click(x,y)
-    pyautogui.write(f'{filename.split("/")[-1]}\n')
+    pyautogui.write(f'{filename.split("/")[-1]}\n', interval=0.25)
     x, y = pyscreeze.locateCenterOnScreen('images/exit.png', confidence="0.9")
     pyautogui.click(x,y)
 

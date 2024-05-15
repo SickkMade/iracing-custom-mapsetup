@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import filedialog
 import os
+import functools
 class Overlay:
     def __init__(self, map_name, cars, update_cars_callback, call_change_car_callback):
         """
@@ -13,7 +14,6 @@ class Overlay:
         self._root = None
         self._update_cars_callback = update_cars_callback
         self._call_change_car_callback = call_change_car_callback
-        self._current_car = None
     def render(self):
         root = tk.Tk()
         self._root = root
@@ -22,7 +22,7 @@ class Overlay:
         root.attributes('-topmost', True)  # Makes the window always on top
         root.overrideredirect(True)  # Removes the window frame
 
-        root.geometry("500x500")
+        root.geometry("500x500+0+500")
         root.title("Car Switcher")
 
         label = tk.Label(root, text=self._map_name)
@@ -38,16 +38,15 @@ class Overlay:
          if adding == [None]:
             return
          for text in adding:
-            self._current_car = text
-            car_label = tk.Button(self._root, text=text.split("/")[-1], command=self.change_car)
+            callback = functools.partial(self._call_change_car_callback, text)
+            car_label = tk.Button(self._root, text=text.split("/")[-1], command=callback)
             car_label.pack()
-    def change_car(self):
-         self._call_change_car_callback(self._current_car)
     def UploadAction(self):
             file_path = filedialog.askopenfilenames(filetypes=[('Car Setups', '*.sto')], initialdir=os.path.expanduser(r'~\Documents\iRacing\setups'))
+            print(file_path)
             self.appendButton(file_path)
             if self._cars == [None]:
-                self._cars = file_path
+                self._cars = [*file_path]
             else:
-                 self._cars.append(file_path)
+                self._cars.append(*file_path)
             self._update_cars_callback(self._map_name, self._cars)
