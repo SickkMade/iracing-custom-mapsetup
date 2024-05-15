@@ -27,15 +27,34 @@ def _save_tracks_json(joined_tracks):
 
 def check_track_json(track_name): #checks if we have saved cars in this track
     joined_tracks = _load_tracks_json()
-    return track_name in joined_tracks
+    for track in joined_tracks:
+        if(next(iter(track)) == track_name):
+            return True
+    return False
 
-def add_track_to_list(track_name):
+def add_track_to_list(track_name, cars=[None]):
     joined_tracks = _load_tracks_json()
-    if track_name not in joined_tracks:
-        joined_tracks.append(track_name)
+    if not check_track_json(track_name):
+        new_track = {
+            track_name: cars
+        }
+        joined_tracks.append(new_track)
         _save_tracks_json(joined_tracks)
 
-# def get_cars()
+def get_cars_json(track_name):
+    if(check_track_json(track_name)): #if track exists lets find the cars
+        joined_tracks = _load_tracks_json()
+        for track in joined_tracks:
+            if(next(iter(track)) == track_name):
+                return track[track_name]
+    return None
+def add_cars_json(track_name, cars):
+    if(check_track_json(track_name)): #if track exists lets find the cars
+        joined_tracks = _load_tracks_json()
+        for i in range(0, len(joined_tracks)):
+            if(next(iter(joined_tracks[i])) == track_name):
+                joined_tracks[i][track_name] = cars
+                _save_tracks_json(joined_tracks)
 
 # here we check if we are connected to iracing
 # so we can retrieve some data
@@ -54,11 +73,13 @@ def check_iracing():
 
 def track_stuff():
     track_name = ir['WeekendInfo']['TrackDisplayName']
-    if(check_track_json(track_name)): #if track has been added on before
-        return (track_name, ['get_cars'])
-    else: #if track doesnt exist in json
+    if not check_track_json(track_name): #if track has been added on before
         add_track_to_list(track_name)
+    return track_name
+        
     
+def update_cars_callback(track_name, cars):
+    add_cars_json(track_name, cars)
 
 def loop():
 
@@ -94,13 +115,14 @@ if __name__ == '__main__':
     
     pyautogui.PAUSE = 0.2
     ir = irsdk.IRSDK()
+    ir.startup()
     state = State()
-    ir.freeze_var_buffer_latest()
 
-    track_stuff()
-    #Overlay(track_name, ['none'])
+    track_name = track_stuff()
+    overlay = Overlay(track_name, cars=get_cars_json(track_name), update_cars_callback=update_cars_callback, call_change_car_callback=change_car)
+    overlay.render()
 
-    change_car('baseline.sto')
+    #change_car('baseline.sto')
 
     # try:
     #     # infinite loop
