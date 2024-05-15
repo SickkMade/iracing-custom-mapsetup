@@ -3,7 +3,7 @@ from tkinter import filedialog
 import os
 import functools
 class Overlay:
-    def __init__(self, map_name, cars, update_cars_callback, call_change_car_callback):
+    def __init__(self, map_name, cars, update_cars_callback, call_change_car_callback, main_loop_callback):
         """
         desc: map_name is the name of the current map and cars is a list
         of the car build names to choose from that have been added
@@ -14,6 +14,7 @@ class Overlay:
         self._root = None
         self._update_cars_callback = update_cars_callback
         self._call_change_car_callback = call_change_car_callback
+        self._main_loop_callback = main_loop_callback
     def render(self):
         root = tk.Tk()
         self._root = root
@@ -32,8 +33,12 @@ class Overlay:
 
         add_car  = tk.Button(root, text="Add Car Setup", command=self.UploadAction)
         add_car.pack()
-
+        
+        root.after(500, self._opacity_callback)
         root.mainloop()
+
+    def alpha(self, alpha):
+        self._root.attributes('-alpha', alpha)
     def appendButton(self, adding):
          if adding == [None]:
             return
@@ -50,3 +55,6 @@ class Overlay:
             else:
                 self._cars.append(*file_path)
             self._update_cars_callback(self._map_name, self._cars)
+    def _opacity_callback(self):
+        self._main_loop_callback()
+        self._root.after(2000, self._opacity_callback)

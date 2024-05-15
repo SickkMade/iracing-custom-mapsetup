@@ -3,6 +3,7 @@ import json
 import pyautogui
 import pyscreeze
 from overlay import Overlay
+import time
 
 # this is our State class, with some helpful variables
 class State:
@@ -82,13 +83,22 @@ def update_cars_callback(track_name, cars):
 def change_car(filename):
     x, y = pyscreeze.locateCenterOnScreen('images/garage.jpg', confidence="0.6")
     pyautogui.click(x,y)
+    time.sleep(0.25)
     x, y = pyscreeze.locateCenterOnScreen('images/my_setups.png', confidence="0.9")
     pyautogui.click(x,y)
     x, y = pyscreeze.locateCenterOnScreen('images/file_name.png', confidence="0.9")
     pyautogui.click(x,y)
-    pyautogui.write(f'{filename.split("/")[-1]}\n', interval=0.25)
+    pyautogui.write(f'{filename.split("/")[-1]}\n')
     x, y = pyscreeze.locateCenterOnScreen('images/exit.png', confidence="0.9")
     pyautogui.click(x,y)
+
+
+def main_loop():
+    if not ir['IsOnTrack']: #if player not in game
+        overlay.alpha(1)
+    else:
+        overlay.alpha(0)
+    
 
 if __name__ == '__main__':
     # initializing ir and state
@@ -99,5 +109,7 @@ if __name__ == '__main__':
     state = State()
 
     track_name = track_stuff()
-    overlay = Overlay(track_name, cars=get_cars_json(track_name), update_cars_callback=update_cars_callback, call_change_car_callback=change_car)
+    overlay = Overlay(track_name, cars=get_cars_json(track_name), update_cars_callback=update_cars_callback, call_change_car_callback=change_car, main_loop_callback=main_loop)
     overlay.render()
+    
+
