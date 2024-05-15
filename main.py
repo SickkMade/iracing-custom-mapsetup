@@ -1,6 +1,4 @@
-import tkinter as tk
 import irsdk
-import time
 import json
 import pyautogui
 import pyscreeze
@@ -47,7 +45,7 @@ def get_cars_json(track_name):
         for track in joined_tracks:
             if(next(iter(track)) == track_name):
                 return track[track_name]
-    return None
+    return [None]
 def add_cars_json(track_name, cars):
     if(check_track_json(track_name)): #if track exists lets find the cars
         joined_tracks = _load_tracks_json()
@@ -81,24 +79,6 @@ def track_stuff():
 def update_cars_callback(track_name, cars):
     add_cars_json(track_name, cars)
 
-def loop():
-
-
-    # retrieve CarSetup from session data
-    # we also check if CarSetup data has been updated
-    # with ir.get_session_info_update_by_key(key)
-    # but first you need to request data, before checking if its updated
-    car_setup = ir['CarSetup']
-    if car_setup:
-        car_setup_tick = ir.get_session_info_update_by_key('CarSetup')
-        if car_setup_tick != state.last_car_setup_tick:
-            state.last_car_setup_tick = car_setup_tick
-            print('car setup update count:', car_setup['UpdateCount'])
-            # now you can go to garage, and do some changes with your setup
-            # this line will be printed, only when you change something
-            # and press apply button, but not every 1 sec
-    
-
 def change_car(filename):
     x, y = pyscreeze.locateCenterOnScreen('images/garage.jpg', confidence="0.6")
     pyautogui.click(x,y)
@@ -106,7 +86,7 @@ def change_car(filename):
     pyautogui.click(x,y)
     x, y = pyscreeze.locateCenterOnScreen('images/file_name.png', confidence="0.9")
     pyautogui.click(x,y)
-    pyautogui.write(f'{filename}\n')
+    pyautogui.write(f'{filename.split("/")[-1]}\n')
     x, y = pyscreeze.locateCenterOnScreen('images/exit.png', confidence="0.9")
     pyautogui.click(x,y)
 
@@ -121,22 +101,3 @@ if __name__ == '__main__':
     track_name = track_stuff()
     overlay = Overlay(track_name, cars=get_cars_json(track_name), update_cars_callback=update_cars_callback, call_change_car_callback=change_car)
     overlay.render()
-
-    #change_car('baseline.sto')
-
-    # try:
-    #     # infinite loop
-    #     while True:
-    #         # check if we are connected to iracing
-    #         check_iracing()
-    #         # if we are, then process data
-    #         if state.ir_connected:
-    #             pass
-                
-    #         # sleep for 1 second
-    #         # maximum you can use is 1/60
-    #         # cause iracing updates data with 60 fps
-    #         time.sleep(1)
-    # except KeyboardInterrupt:
-    #     # press ctrl+c to exit
-    #     pass
